@@ -5,7 +5,7 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
-    <AssemblyName>wolfenstein-renderer</AssemblyName>
+    <AssemblyName>rasterization-renderer</AssemblyName>
     <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
