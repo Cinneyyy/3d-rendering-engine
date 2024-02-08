@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
+    <AssemblyName>wolfenstein-renderer</AssemblyName>
+    <Nullable>enable</Nullable>
+    <PublishAot>true</PublishAot>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <RootNamespace></RootNamespace>
+    <ApplicationIcon>res\App\appicon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="res\App\appicon.ico" />
+    <None Remove="res\App\Missing.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="res\App\appicon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="res\App\appicon.ico" />
+    <EmbeddedResource Include="res\App\Missing.png" />
+  </ItemGroup>
+
+</Project>
