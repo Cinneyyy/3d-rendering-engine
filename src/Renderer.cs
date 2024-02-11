@@ -67,6 +67,11 @@ public static class Renderer
         }
     }
 
+    public static Tri tri = new() {
+        pt0 = new(-2, 0, 5),
+        pt1 = new(2, 0, 5),
+        pt2 = new(0, 3, 5)
+    };
     private static void Draw()
     {
         canvas.Clear(Color.Black);
@@ -77,9 +82,31 @@ public static class Renderer
         //    (int)(255 * MathF.Max(0, MathF.Cos(Program.secondsPassed))),
         //    (int)(255 * MathF.Max(0, MathF.Sin(Program.secondsPassed - MathF.PI)))));
 
-
+        for(int x = 0; x < ScreenW; x++)
+            for(int y = 0; y < ScreenH; y++)
+            {
+                Vec3f pt = new(x/ScreenW * 7.5f, y/ScreenH * 7.5f, 5f);
+                screen.SetPixel(x, y, PointInsideTriangle(in pt, in tri) ? Color.White : Color.Black);
+            }
 
         // Tps debugger
         canvas.DrawString(Window.tps.ToString("00"), new Font(FontFamily.GenericMonospace, 10), Brushes.White, 3, 3);
+    }
+
+    /*
+        s = 1 / ( (v1[1] - v2[1]) * (v0[0] - v2[0]) + (v2[0] - v1[0]) * (v0[1] - v2[1]))
+        s_a = ((v1[1] - v2[1]) * (pt[0] - v2[0]) + (v2[0] - v1[0]) * (pt[1] - v2[1])) * s
+        s_b = ((v2[1] - v0[1]) * (pt[0] - v2[0]) + (v0[0] - v2[0]) * (pt[1] - v2[1])) * s
+        s_c = 1 - s_a - s_b
+        return 0 <= s_a <= 1 and 0 <= s_b <= 1 and 0 <= s_c <= 1
+    */
+    private static bool PointInsideTriangle(in Vec3f pt, in Tri tri)
+    {
+        var (v0, v1, v2) = tri;
+        float s = 1f / ((v1.y - v2.y) * (v0.x - v2.x) + (v2.x - v1.x) * (v0.y - v2.y));
+        float s_a = ((v1.y - v2.y) * (pt.x - v2.x) + (v2.x - v1.x) * (pt.x - v2.x)) * s;
+        float s_b = ((v2.y - v0.y) * (pt.x - v2.x) + (v0.x - v2.x) * (pt.y - v2.y)) * s;
+        float s_c = 1 - s_a - s_b;
+        return 0 <= s_a && s_a <= 1 && 0 <= s_b  && s_b <= 1 && 0 <= s_c && s_c <= 1;
     }
 }

@@ -25,6 +25,9 @@ public record struct Vec3f(float x, float y, float z)
     public Vec3f(float xyz) : this(xyz, xyz, xyz) { }
     public Vec3f(Vec2f v2) : this(v2.x, v2.y) { }
     public Vec3f(Vec2i v2) : this(v2.x, v2.y) { }
+    public Vec3f(Vec2f v2, float z) : this(v2.x, v2.y, z) { }
+    public Vec3f(Vec2i v2, float z) : this(v2.x, v2.y, z) { }
+    public Vec3f(Vec2i v2, int z) : this(v2.x, v2.y, z) { }
     public Vec3f(Vec3i v3) : this(v3.x, v3.y, v3.z) { }
 
 
