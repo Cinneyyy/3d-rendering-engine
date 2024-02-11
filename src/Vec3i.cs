@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace src;
 
-public record struct Vec3i(int x, int y, int z)
+public record struct Vec3i(int x, int y, int z) : IEnumerable<int>
 {
     public int x = x, y = y, z = z;
 
@@ -36,6 +38,15 @@ public record struct Vec3i(int x, int y, int z)
         y = this.y;
         z = this.z;
     }
+
+    public readonly IEnumerator<int> GetEnumerator()
+    {
+        yield return x;
+        yield return y;
+        yield return z;
+    }
+    readonly IEnumerator IEnumerable.GetEnumerator()
+        => GetEnumerator();
 
 
     public static Vec3i Op(Vec3i a, Vec3i b, Func<int, int, int> op)

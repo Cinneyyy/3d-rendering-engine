@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace src;
 
-public record struct Vec2i(int x, int y)
+public record struct Vec2i(int x, int y) : IEnumerable<int>
 {
     public int x = x, y = y;
 
@@ -27,6 +29,14 @@ public record struct Vec2i(int x, int y)
         x = this.x;
         y = this.y;
     }
+
+    public readonly IEnumerator<int> GetEnumerator()
+    {
+        yield return x;
+        yield return y;
+    }
+    readonly IEnumerator IEnumerable.GetEnumerator()
+        => GetEnumerator();
 
 
     public static Vec2i Op(Vec2i a, Vec2i b, Func<int, int, int> op)

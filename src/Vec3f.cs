@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace src;
 
-public record struct Vec3f(float x, float y, float z)
+public record struct Vec3f(float x, float y, float z) : IEnumerable<float>
 {
     public float x = x, y = y, z = z;
 
@@ -39,6 +41,15 @@ public record struct Vec3f(float x, float y, float z)
         y = this.y;
         z = this.z;
     }
+
+    public readonly IEnumerator<float> GetEnumerator()
+    {
+        yield return x;
+        yield return y;
+        yield return z;
+    }
+    readonly IEnumerator IEnumerable.GetEnumerator()
+        => GetEnumerator();
 
     public readonly Vec3i Round() => new((int)x, (int)y, (int)z);
     public readonly Vec3i Ceil() => new((int)MathF.Ceiling(x), (int)MathF.Ceiling(y), (int)MathF.Ceiling(z));

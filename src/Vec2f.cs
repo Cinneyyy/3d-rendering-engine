@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace src;
 
-public record struct Vec2f(float x, float y)
+public record struct Vec2f(float x, float y) : IEnumerable<float>
 {
     public float x = x, y = y;
 
@@ -43,7 +45,15 @@ public record struct Vec2f(float x, float y)
     public readonly Vec2i Round() => new((int)x, (int)y);
     public readonly Vec2i Ceil() => new((int)MathF.Ceiling(x), (int)MathF.Ceiling(y));
     public readonly Vec2i Floor() => new((int)MathF.Floor(x), (int)MathF.Floor(y));
- 
+
+    public readonly IEnumerator<float> GetEnumerator()
+    {
+        yield return x;
+        yield return y;
+    }
+    readonly IEnumerator IEnumerable.GetEnumerator()
+        => GetEnumerator();
+
 
     public static Vec2f Op(Vec2f a, Vec2f b, Func<float, float, float> op)
         => new(op(a.x, b.x), op(a.y, b.y));
