@@ -15,8 +15,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="res\Models\torus.obj" />
     <None Remove="res\App\appicon.ico" />
+    <None Remove="res\App\bk.PNG" />
     <None Remove="res\App\Missing.png" />
+    <None Remove="res\App\vosuzrp9efj81.jpg" />
+    <None Remove="res\cube.obj" />
+    <None Remove="res\monke.obj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,8 +29,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="res\Models\torus.obj" />
     <EmbeddedResource Include="res\App\appicon.ico" />
+    <EmbeddedResource Include="res\App\bk.PNG" />
     <EmbeddedResource Include="res\App\Missing.png" />
+    <EmbeddedResource Include="res\App\vosuzrp9efj81.jpg" />
+    <EmbeddedResource Include="res\Models\cube.obj" />
+    <EmbeddedResource Include="res\Models\monke.obj" />
   </ItemGroup>
 
 </Project>

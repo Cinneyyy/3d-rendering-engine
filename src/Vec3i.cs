@@ -24,7 +24,7 @@ public record struct Vec3i(int x, int y, int z) : IEnumerable<int>
     public Vec3i(int x, int y) : this(x, y, 0) { }
     public Vec3i(int xyz) : this(xyz, xyz, xyz) { }
     public Vec3i(Vec2f v2) : this((int)v2.x, (int)v2.y) { }
-    public Vec3i(Vec2i v2) : this(v2.x, v2.y) { } 
+    public Vec3i(Vec2i v2) : this(v2.x, v2.y) { }
     public Vec3i(Vec2f v2, int z) : this((int)v2.x, (int)v2.y, z) { }
     public Vec3i(Vec2i v2, int z) : this(v2.x, v2.y, z) { }
     public Vec3i(Vec3f v3) : this((int)v3.x, (int)v3.y, (int)v3.z) { }

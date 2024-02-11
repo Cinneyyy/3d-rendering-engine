@@ -6,7 +6,6 @@ public class Program
 {
     public static readonly DateTime startupTime = DateTime.Now;
 
-
     public static float secondsPassed => (float)(DateTime.Now - startupTime).TotalSeconds;
 
 
@@ -21,7 +20,7 @@ public class Program
             //float winScale = Window.ScreenCoverage / 100f * (physicalScreen.y / Renderer.ScreenH);
             //Vec2i virtualScreen = new((int)Math.Ceiling(Renderer.ScreenW * winScale), (int)Math.Ceiling(Renderer.ScreenH * winScale));
 
-            Window win = new("Wolfenstein Renderer", 60);
+            Window win = new("3D Renderer", 60);
 
             Input.Init();
 
@@ -31,8 +30,7 @@ public class Program
         }
         catch(Exception exc)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            ConsoleWindow.Output(exc);
+            Out(exc);
             Console.ReadKey();
         }
     }

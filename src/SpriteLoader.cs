@@ -16,18 +16,21 @@ public static class SpriteLoader
 
     public static readonly Dictionary<string, Bitmap> sprites = [];
     public static readonly (string id, string manifest)[] manifestData = [
-        ("missing", Path.App + "Missing")
+        ("missing", Path.App + "Missing.png"),
+        ("amon", Path.App + "vosuzrp9efj81.jpg"),
+        ("bk", Path.App + "bk.PNG")
     ];
 
 
-    public static Bitmap Get(string id) => sprites.TryGetValue(id, out var bmp) ? bmp : sprites["missing"];
+    public static Bitmap Get(string id) 
+        => sprites.TryGetValue(id, out var bmp) ? bmp : sprites["missing"];
 
     public static void Load()
     {
         var asm = Assembly.GetExecutingAssembly();
 
         foreach(var (id, manifest) in manifestData)
-            using(Stream? stream = asm.GetManifestResourceStream(manifest + ".png"))
+            using(Stream? stream = asm.GetManifestResourceStream(manifest))
                 if(NotNull(stream, $"Manifest stream for manifest \"{manifest}\" returned null!"))
                     sprites.Add(id, new(stream!));
 

@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
+using System.Reflection;
 
 namespace src;
 
@@ -21,8 +22,14 @@ public static class Renderer
     private static readonly Graphics canvas = Graphics.FromImage(screen);
 
     private static bool drawing = false;
-    private static ulong currFrame = 0;
+    private static ulong frameCount = 0;
     private static ulong frameSkips = 0;
+
+
+    static Renderer()
+    {
+        obj = ObjLoader.LoadToEdgeMesh(Assembly.GetExecutingAssembly()!.GetManifestResourceStream("res.Models.monke.obj")!);
+    }
 
 
     public static void Tick(object? sender, ElapsedEventArgs args)
@@ -33,17 +40,18 @@ public static class Renderer
         {
             if(!drawing)
             {
-                currFrame++;
-                PreventFrameHalt(currFrame, 100);
+                frameCount++;
+                PreventFrameHalt(frameCount, 100);
 
                 drawing = true;
                 try
                 {
                     Draw();
                 }
-                catch
+                catch(Exception e)
                 {
                     drawing = false;
+                    Out($"Error at frame #{frameCount}: {e}");
                     return;
                 }
 
@@ -61,41 +69,58 @@ public static class Renderer
     private static async void PreventFrameHalt(ulong currFrame, int delay)
     {
         await Task.Delay(delay);
-        if(Renderer.currFrame == currFrame)
+        if(Renderer.frameCount == currFrame)
         {
             drawing = false;
             frameSkips++;
-            Out($"Frame skip #{frameSkips} ({UtilFuncs.AddSuffix(currFrame)} frame)");
+            //Out($"Frame skip #{frameSkips} ({UtilFuncs.AddSuffix(currFrame)} frame)");
         }
     }
 
-    static Vec3f[] rect = [
-        new(-1, -1, -1),
-        new(-1, -1,  1),
-        new( 1, -1, -1),
-        new(-1,  1, -1),
-        new(-1,  1,  1),
-        new( 1, -1,  1),
-        new( 1,  1, -1),
-        new( 1,  1,  1)
-    ];
-    static Vec2i[] edges = [
-        new(0, 1),
-        new(0, 2),
-        new(0, 3),
-        new(2, 5),
-        new(3, 6),
-        new(3, 4),
-        new(4, 7),
-        new(6, 7),
-        new(7, 5),
-        new(5, 1),
-        new(4, 1),
-        new(2, 6)
-    ];
-    static Vec3f camPos;
-    static Vec3f eulerRot;
-    static float fl = 10f;
+    static EdgeMesh obj;
+    #region Meshes
+    static Mesh cubeVerts = new(new Vec3f[] {
+        new(-1, -1, -1), // 0
+        new(-1, -1,  1), // 1
+        new( 1, -1, -1), // 2
+        new(-1,  1, -1), // 3
+        new(-1,  1,  1), // 4
+        new( 1, -1,  1), // 5
+        new( 1,  1, -1), // 6
+        new( 1,  1,  1)  // 7
+    });
+    static QuadMesh cubeQuads = new(cubeVerts, [
+        new(0, 3, 6, 2, Brushes.Red),
+        new(1, 5, 7, 4, Brushes.Orange),
+        new(2, 5, 7, 6, Brushes.Blue),
+        new(0, 1, 4, 3, Brushes.Violet),
+        new(0, 2, 5, 1, Brushes.Green),
+        new(3, 6, 7, 4, Brushes.Cyan)
+
+    ]);
+    static EdgeMesh cubeEdges = new(cubeVerts, [
+            new(0, 1),
+            new(0, 2),
+            new(0, 3),
+            new(2, 5),
+            new(3, 6),
+            new(3, 4),
+            new(4, 7),
+            new(6, 7),
+            new(7, 5),
+            new(5, 1),
+            new(4, 1),
+            new(2, 6),
+
+            new(0, 7),
+            new(2, 4),
+            new(1, 6),
+            new(3, 5)
+    ]);
+    #endregion
+    public static Vec3f camPos = new(0, 0, -3);
+    static Vec3f camRot;
+    static float fov = 90f * (MathF.PI/180f);
     private static void Draw()
     {
         canvas.Clear(Color.Black);
@@ -106,40 +131,59 @@ public static class Renderer
         //    (int)(255 * MathF.Max(0, MathF.Cos(Program.secondsPassed))),
         //    (int)(255 * MathF.Max(0, MathF.Sin(Program.secondsPassed - MathF.PI)))));
 
-        if(Input.KeyHelt(Keys.Left)) eulerRot.x -= Window.deltaTime;
-        if(Input.KeyHelt(Keys.Right)) eulerRot.x += Window.deltaTime;
-        if(Input.KeyHelt(Keys.Up)) eulerRot.y += Window.deltaTime;
-        if(Input.KeyHelt(Keys.Down)) eulerRot.y -= Window.deltaTime;
+        // Move
+        if(Input.KeyHelt(Keys.Left)) camRot.y -= Window.deltaTime;
+        if(Input.KeyHelt(Keys.Right)) camRot.y += Window.deltaTime;
+        if(Input.KeyHelt(Keys.Up)) camRot.x += Window.deltaTime;
+        if(Input.KeyHelt(Keys.Down)) camRot.x -= Window.deltaTime;
 
-        if(Input.KeyHelt(Keys.W)) camPos.z += Window.deltaTime;
-        if(Input.KeyHelt(Keys.S)) camPos.z -= Window.deltaTime;
-        if(Input.KeyHelt(Keys.D)) camPos.x += Window.deltaTime;
-        if(Input.KeyHelt(Keys.A)) camPos.x -= Window.deltaTime;
+        Vec3f move = new();
+        if(Input.KeyHelt(Keys.W)) move.z += Window.deltaTime;
+        if(Input.KeyHelt(Keys.S)) move.z -= Window.deltaTime;
+        if(Input.KeyHelt(Keys.D)) move.x += Window.deltaTime;
+        if(Input.KeyHelt(Keys.A)) move.x -= Window.deltaTime;
+        if(Input.KeyHelt(Keys.Space)) move.y += Window.deltaTime;
+        if(Input.KeyHelt(Keys.ShiftKey)) move.y -= Window.deltaTime;
+        camPos += move;
 
-        PointF[] projectedPoints = (from p in rect
-                                   select (PointF)(Project3dPoint(p, camPos, eulerRot, fl) * 100f + center))
-                                   .ToArray();
+        if(Input.KeyHelt(Keys.I)) fov += Window.deltaTime;
+        if(Input.KeyHelt(Keys.U)) fov -= Window.deltaTime;
 
-        foreach(Vec2i e in edges)
-            canvas.DrawLine(new(Brushes.White), projectedPoints[e.x], projectedPoints[e.y]);
+        // Project
+        //cubeEdges.projectionBuffer =
+        //    (from v in cubeEdges.vertices
+        //     let proj = (PointF)WorldToScreen(Project3dPoint(v, camPos, camRot, fov))
+        //     select proj with { Y = ScreenH - proj.Y })
+        //    .ToArray();
+        //cubeEdges.DrawToScreen(canvas);
+
+        // Project
+        obj.projectionBuffer =
+            (from v in obj.vertices
+             let proj = (PointF)WorldToScreen(Project3dPoint(v, camPos, camRot, fov))
+             select proj with { Y = ScreenH - proj.Y })
+            .ToArray();
+        obj.DrawToScreen(canvas);
+
+        // Project
+        //cubeQuads.projectionBuffer =
+        //    (from v in cubeQuads.vertices
+        //     let proj = (PointF)WorldToScreen(Project3dPoint(v, camPos, camRot, fov))
+        //     select proj with { Y = ScreenH - proj.Y })
+        //    .ToArray();
+        //cubeQuads.DrawToScreen(canvas);
+
+        //canvas.DrawImage(SpriteLoader.Get("amon"), new PointF(50, 50), new(300, 30), new(300, 170), new(50, 150));
+
+        // Boykisser
+        //canvas.DrawImage(SpriteLoader.Get("bk"), 50, 50, (MathF.Sin(frameCount/20f) + 1.5f) * 100, (MathF.Cos(frameCount/30f + MathF.PI/2f) + 1.5f) * 100);
 
         // Tps debugger
         canvas.DrawString(Window.tps.ToString("00"), new Font(FontFamily.GenericMonospace, 10), Brushes.White, 3, 3);
     }
 
-    private static Vec2f Project3dPoint(Vec3f pt, Vec3f cam, Vec3f rot, float fl)
-    {
-        // Apply rotation to the point and the camera position
-        Vec3f rotatedPt = RotateZ(RotateX(RotateY(pt - cam, rot.y), rot.x), rot.z);
-        Vec3f rotatedCam = RotateZ(RotateX(RotateY(cam, rot.y), rot.x), rot.z);
-
-        // Translate the rotated point to the origin
-        Vec3f translatedPt = rotatedPt - rotatedCam;
-
-        // Perform projection
-        return Project(translatedPt, fl);
-    }
-    //    => Project(RotateZ(RotateX(RotateY(pt - cam, rot.x), rot.y), rot.z) + cam, fl);
+    private static Vec2f Project3dPoint(Vec3f pt, Vec3f camPos, Vec3f camRot, float fov)
+        => Project(RotateZ(RotateX(RotateY(pt - camPos, camRot.y), camRot.x), camRot.z) - new Vec3f(0f, 0f, fov), fov);
 
     private static Vec3f RotateX(Vec3f pt, float rot)
         => new(pt.x,
@@ -156,7 +200,10 @@ public static class Renderer
                MathF.Sin(rot) * pt.x + MathF.Cos(rot) * pt.y,
                pt.z);
 
-    private static Vec2f Project(Vec3f pt, float fl)
-        => new(fl * pt.x / (fl + pt.z),
-               fl * pt.y / (fl + pt.z));
+    private static Vec2f Project(Vec3f pt, float fov)
+        => new(fov * pt.x / (fov + pt.z),
+               fov * pt.y / (fov + pt.z));
+
+    private static Vec2f WorldToScreen(Vec2f pt)
+        => (pt + Vec2f.one) / 2f * ScreenH + new Vec2f(CenterY, 0);
 }
