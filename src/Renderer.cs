@@ -28,7 +28,7 @@ public static class Renderer
 
     static Renderer()
     {
-        obj = ObjLoader.LoadToEdgeMesh(Assembly.GetExecutingAssembly()!.GetManifestResourceStream("res.Models.monke.obj")!);
+        obj = ObjLoader.LoadToEdgeMesh(Assembly.GetExecutingAssembly()!.GetManifestResourceStream("res.Models.cube.obj")!);
     }
 
 
@@ -48,10 +48,10 @@ public static class Renderer
                 {
                     Draw();
                 }
-                catch(Exception e)
+                catch//(Exception e)
                 {
                     drawing = false;
-                    Out($"Error at frame #{frameCount}: {e}");
+                    //Out($"Error at frame #{frameCount}: {e}");
                     return;
                 }
 
@@ -118,9 +118,10 @@ public static class Renderer
             new(3, 5)
     ]);
     #endregion
-    public static Vec3f camPos = new(0, 0, -3);
+    public static Vec3f camPos {get;set;} = new(0, 0, -3);
     static Vec3f camRot;
     static float fov = 90f * (MathF.PI/180f);
+    static Vec3f objRot = Vec3f.zero;
     private static void Draw()
     {
         canvas.Clear(Color.Black);
@@ -149,6 +150,8 @@ public static class Renderer
         if(Input.KeyHelt(Keys.I)) fov += Window.deltaTime;
         if(Input.KeyHelt(Keys.U)) fov -= Window.deltaTime;
 
+        objRot += new Vec3f(0f, Window.deltaTime, 0f);
+
         // Project
         //cubeEdges.projectionBuffer =
         //    (from v in cubeEdges.vertices
@@ -160,7 +163,7 @@ public static class Renderer
         // Project
         obj.projectionBuffer =
             (from v in obj.vertices
-             let proj = (PointF)WorldToScreen(Project3dPoint(v, camPos, camRot, fov))
+             let proj = (PointF)WorldToScreen(Project3dPoint(v, objRot, obj.center, camPos, camRot, fov))
              select proj with { Y = ScreenH - proj.Y })
             .ToArray();
         obj.DrawToScreen(canvas);
@@ -182,8 +185,12 @@ public static class Renderer
         canvas.DrawString(Window.tps.ToString("00"), new Font(FontFamily.GenericMonospace, 10), Brushes.White, 3, 3);
     }
 
-    private static Vec2f Project3dPoint(Vec3f pt, Vec3f camPos, Vec3f camRot, float fov)
-        => Project(RotateZ(RotateX(RotateY(pt - camPos, camRot.y), camRot.x), camRot.z) - new Vec3f(0f, 0f, fov), fov);
+    private static Vec2f Project3dPoint(Vec3f pt, Vec3f ptRot, Vec3f ptRotOrigin, Vec3f camPos, Vec3f camRot, float fov)
+    {
+        Vec3f rotated = RotateYXZ(RotateYXZ(pt, ptRot) - camPos, camRot);
+        Vec3f translated = rotated - new Vec3f(0f, 0f, fov);
+        return Project(translated, fov);
+    }
 
     private static Vec3f RotateX(Vec3f pt, float rot)
         => new(pt.x,
@@ -199,6 +206,9 @@ public static class Renderer
         => new(MathF.Cos(rot) * pt.x - MathF.Sin(rot) * pt.y,
                MathF.Sin(rot) * pt.x + MathF.Cos(rot) * pt.y,
                pt.z);
+
+    private static Vec3f RotateYXZ(Vec3f pt, Vec3f rot)
+        => RotateZ(RotateX(RotateY(pt, rot.y), rot.x), rot.z);
 
     private static Vec2f Project(Vec3f pt, float fov)
         => new(fov * pt.x / (fov + pt.z),
