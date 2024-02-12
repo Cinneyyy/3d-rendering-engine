@@ -24,7 +24,7 @@ public class Program
 
             Input.Init();
 
-            win.tick += Player.Tick!;
+            win.tick += ProcessState.Tick!;
             win.tick += Renderer.Tick!;
             win.tick += Input.FinishTick!;
         }

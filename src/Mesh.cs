@@ -5,12 +5,11 @@ using System.Linq;
 
 namespace src;
 
-public class Mesh(params Vec3f[] vertices)
+public class Mesh(params Vec3f[] vertices) : WorldObject()
 {
     private Vec3f[] vertices = vertices;
 
     public PointF[] projectionBuffer = [];
-    public Vec3f offset;
 
 
     public Vec3f anchor
@@ -19,7 +18,7 @@ public class Mesh(params Vec3f[] vertices)
             Vec3f sum = Vec3f.zero;
             foreach(Vec3f v in vertices)
                 sum += v;
-            return sum / vertices.Length + offset;
+            return sum / vertices.Length + pos;
         }
     }
 
@@ -33,11 +32,11 @@ public class Mesh(params Vec3f[] vertices)
 
 
     public Vec3f GetVertex(int index)
-        => vertices[index] + offset;
+        => vertices[index] + pos;
 
     public IEnumerable<Vec3f> GetVertices()
         => from v in vertices
-           select v + offset;
+           select v + pos;
 
     public Vec3f[] CopyVertices()
         => (Vec3f[])vertices.Clone();

@@ -8,6 +8,7 @@ using System.Reflection;
 
 namespace src;
 
+#pragma warning disable CA2211
 public static class Renderer
 {
     public const int ScreenW = 384;
@@ -16,8 +17,9 @@ public static class Renderer
     public const int CenterY = ScreenH/2;
 
     public static readonly Vec2f screenSize = new(ScreenW, ScreenH);
-    public static readonly Vec2f center = new(CenterX - Player.MapX * Player.TileSize / 2, CenterY - Player.MapY * Player.TileSize / 2);
+    public static readonly Vec2f screenCenter = new(CenterX, CenterY);
     public static readonly Bitmap screen = new(ScreenW, ScreenH);
+    public static Camera cam = new(new(0f, 0f, -3f), Vec3f.zero, 90f);
 
     private static readonly Graphics canvas = Graphics.FromImage(screen);
 
@@ -27,7 +29,7 @@ public static class Renderer
 
 
     static Renderer()
-        => obj = ObjLoader.LoadToEdgeMesh(Assembly.GetExecutingAssembly()!.GetManifestResourceStream("res.Models.monke.obj")!);
+        => obj = ObjLoader.LoadToEdgeMesh(Assembly.GetExecutingAssembly()!.GetManifestResourceStream("res.Models.cube.obj")!);
 
 
     public static void Tick(object? sender, ElapsedEventArgs args)
@@ -60,8 +62,8 @@ public static class Renderer
     }
 
 
-    public static Vec2f ToCenter(Vec2f pos) => center + pos;
-    public static Vec2i ToCenter(Vec2i pos) => center.Round() + pos;
+    public static Vec2f ToCenter(Vec2f pos) => screenCenter + pos;
+    public static Vec2i ToCenter(Vec2i pos) => screenCenter.Round() + pos;
 
 
     private static async void PreventFrameHalt(ulong currFrame, int delay)
@@ -116,9 +118,6 @@ public static class Renderer
             new(3, 5)
     ]);
     #endregion
-    public static Vec3f camPos {get;set;} = new(0, 0, -3);
-    static Vec3f camRot;
-    static float fov = 90f * (MathF.PI/180f);
     static Vec3f objRot = Vec3f.zero;
     private static void Draw()
     {
@@ -129,26 +128,6 @@ public static class Renderer
         //    (int)(255 * MathF.Max(0, MathF.Sin(Program.secondsPassed))),
         //    (int)(255 * MathF.Max(0, MathF.Cos(Program.secondsPassed))),
         //    (int)(255 * MathF.Max(0, MathF.Sin(Program.secondsPassed - MathF.PI)))));
-
-        // Move
-        if(Input.KeyHelt(Keys.Left)) camRot.y -= Window.deltaTime;
-        if(Input.KeyHelt(Keys.Right)) camRot.y += Window.deltaTime;
-        if(Input.KeyHelt(Keys.Up)) camRot.x += Window.deltaTime;
-        if(Input.KeyHelt(Keys.Down)) camRot.x -= Window.deltaTime;
-
-        Vec3f move = new();
-        if(Input.KeyHelt(Keys.W)) move.z += Window.deltaTime;
-        if(Input.KeyHelt(Keys.S)) move.z -= Window.deltaTime;
-        if(Input.KeyHelt(Keys.D)) move.x += Window.deltaTime;
-        if(Input.KeyHelt(Keys.A)) move.x -= Window.deltaTime;
-        if(Input.KeyHelt(Keys.Space)) move.y += Window.deltaTime;
-        if(Input.KeyHelt(Keys.ShiftKey)) move.y -= Window.deltaTime;
-        camPos += move;
-
-        if(Input.KeyHelt(Keys.I)) fov += Window.deltaTime;
-        if(Input.KeyHelt(Keys.U)) fov -= Window.deltaTime;
-
-        objRot += new Vec3f(Window.deltaTime);
 
         // Project
         //cubeEdges.projectionBuffer =
@@ -161,7 +140,7 @@ public static class Renderer
         // Project
         obj.projectionBuffer =
             (from v in obj.GetVertices()
-             let proj = (PointF)WorldToScreen(Project3dPoint(v, objRot, obj.anchor, obj.offset, camPos, camRot, fov))
+             let proj = (PointF)WorldToScreen(Project3dPoint(v, objRot, obj.anchor, obj.pos, cam.pos, cam.rot, cam.fov))
              select proj with { Y = ScreenH - proj.Y })
             .ToArray();
         obj.DrawToScreen(canvas);

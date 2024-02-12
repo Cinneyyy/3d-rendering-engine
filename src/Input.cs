@@ -72,11 +72,9 @@ public static class Input
         if(args.Location == (Point)Window.curr!.center)
             return;
 
-        Vec2i screenDelta = lastCursor - (Vec2i)args.Location;
-        if(lockCursor) 
-            Cursor.Position = (Point)Window.curr!.center;
-        lastCursor = (Vec2i)Cursor.Position;
-
-        Player.angle -= screenDelta.x * Window.curr!.downscaleFactor * Player.sensitivity;
+        //Vec2i screenDelta = lastCursor - (Vec2i)args.Location;
+        //if(lockCursor) 
+        //    Cursor.Position = (Point)Window.curr!.center;
+        //lastCursor = (Vec2i)Cursor.Position;
     }
 }

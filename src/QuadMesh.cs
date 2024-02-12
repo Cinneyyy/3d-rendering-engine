@@ -21,7 +21,7 @@ public class QuadMesh(Vec3f[] vertices, QuadMesh.Quad[] quads) : Mesh(vertices)
                 mesh[q.b],
                 mesh[q.c],
                 mesh[q.d]
-            } select Renderer.camPos - p).ToArray();;
+            } select Renderer.cam.pos - p).ToArray();;
 
             float avg = 0f;
             foreach(var v2 in points)

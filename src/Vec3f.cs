@@ -62,6 +62,116 @@ public record struct Vec3f(float x, float y, float z) : IEnumerable<float>
     public static float Dot(Vec3f a, Vec3f b)
         => a.x*b.x + a.y*b.y + a.z*b.z;
 
+    public static Vec3f FromEulerRotation(Vec3f rot)
+        => new(MathF.Sin(rot.x), MathF.Sin(rot.y), MathF.Sin(rot.z));
+
+    public static Vec3f RotateX(Vec3f v, float rot)
+    => new(v.x,
+           MathF.Cos(rot) * v.y - MathF.Sin(rot) * v.z,
+           MathF.Sin(rot) * v.y + MathF.Cos(rot) * v.z);
+
+    public static Vec3f RotateY(Vec3f v, float rot)
+        => new(MathF.Cos(rot) * v.x - MathF.Sin(rot) * v.z,
+               v.y,
+               MathF.Sin(rot) * v.x + MathF.Cos(rot) * v.z);
+
+    public static Vec3f RotateZ(Vec3f v, float rot)
+        => new(MathF.Cos(rot) * v.x - MathF.Sin(rot) * v.y,
+               MathF.Sin(rot) * v.x + MathF.Cos(rot) * v.y,
+               v.z);
+
+    public static Vec3f RotateYXZ(Vec3f v, Vec3f rot)
+    {
+        /*
+        Vec3f y = new(
+            MathF.Cos(rot.y) * v.x - MathF.Sin(rot.y) * v.z,
+            v.y,
+            MathF.Sin(rot.y) * v.x + MathF.Cos(rot.y) * v.z);
+
+        Vec3f x =  new(
+            y.x,
+            MathF.Cos(rot.x) * y.y - MathF.Sin(rot.x) * y.z,
+            MathF.Sin(rot.x) * y.y + MathF.Cos(rot.x) * y.z);
+
+        Vec3f z = new(
+            MathF.Cos(rot.z) * x.x - MathF.Sin(rot.z) * x.y,
+            MathF.Sin(rot.z) * x.x + MathF.Cos(rot.z) * x.y,
+            x.z);
+
+        Vec3f xyz = new(
+            MathF.Cos(rot.z) * (MathF.Cos(rot.y) * v.x - MathF.Sin(rot.y) * v.z) - MathF.Sin(rot.z) * (MathF.Cos(rot.x) * v.y - MathF.Sin(rot.x) * (MathF.Sin(rot.y) * v.x + MathF.Cos(rot.y) * v.z)),
+            MathF.Sin(rot.z) * (MathF.Cos(rot.y) * v.x - MathF.Sin(rot.y) * v.z) + MathF.Cos(rot.z) * (MathF.Cos(rot.x) * v.y - MathF.Sin(rot.x) * (MathF.Sin(rot.y) * v.x + MathF.Cos(rot.y) * v.z)),
+            MathF.Sin(rot.x) * v.y + MathF.Cos(rot.x) * (MathF.Sin(rot.y) * v.x + MathF.Cos(rot.y) * v.z));
+        */
+
+        return RotateZ(RotateX(RotateY(v, rot.y), rot.x), rot.z).normalized;
+    }
+
+    #region Do not touch !!
+    public static Vec3f EulerToVector(float xRotation, float yRotation, float zRotation)
+    {
+        // Convert Euler angles to rotation matrix
+        float[,] rotationMatrix = EulerToRotationMatrix(-xRotation, yRotation, zRotation);
+
+        // Apply rotation matrix to unit vector
+        Vec3f rotatedVector = new Vec3f(
+            rotationMatrix[0, 2],  // x component of the rotated vector
+            rotationMatrix[1, 2],  // y component of the rotated vector
+            rotationMatrix[2, 2]); // z component of the rotated vector
+
+        return rotatedVector.normalized;
+    }
+
+    private static float[,] EulerToRotationMatrix(float xRotation, float yRotation, float zRotation)
+    {
+        // Convert Euler angles to rotation matrix
+        float[,] xRotationMatrix = {
+            {1, 0, 0},
+            {0, (float)Math.Cos(xRotation), -(float)Math.Sin(xRotation)},
+            {0, (float)Math.Sin(xRotation), (float)Math.Cos(xRotation)}
+        };
+
+        float[,] yRotationMatrix = {
+            {(float)Math.Cos(yRotation), 0, (float)Math.Sin(yRotation)},
+            {0, 1, 0},
+            {-(float)Math.Sin(yRotation), 0, (float)Math.Cos(yRotation)}
+        };
+
+        float[,] zRotationMatrix = {
+            {(float)Math.Cos(zRotation), -(float)Math.Sin(zRotation), 0},
+            {(float)Math.Sin(zRotation), (float)Math.Cos(zRotation), 0},
+            {0, 0, 1}
+        };
+
+        // Combine rotation matrices
+        return MultiplyMatrices(zRotationMatrix, MultiplyMatrices(yRotationMatrix, xRotationMatrix));
+    }
+
+    private static float[,] MultiplyMatrices(float[,] matrix1, float[,] matrix2)
+    {
+        int rows1 = matrix1.GetLength(0);
+        int cols1 = matrix1.GetLength(1);
+        int cols2 = matrix2.GetLength(1);
+
+        float[,] result = new float[rows1, cols2];
+
+        for(int i = 0; i < rows1; i++)
+        {
+            for(int j = 0; j < cols2; j++)
+            {
+                float sum = 0;
+                for(int k = 0; k < cols1; k++)
+                {
+                    sum += matrix1[i, k] * matrix2[k, j];
+                }
+                result[i, j] = sum;
+            }
+        }
+
+        return result;
+    }
+    #endregion
+
 
     public static Vec3f operator +(Vec3f a, Vec3f b) => new(a.x + b.x, a.y + b.y, a.z + b.z);
     public static Vec3f operator -(Vec3f a, Vec3f b) => new(a.x - b.x, a.y - b.y, a.z - b.z);
