@@ -14,21 +14,21 @@ public static class ProcessState
 
     static ProcessState()
     {
-        //EdgeMesh[] meshes = [
-        //    ResourceLoader.edgeMeshes["cube"].Clone<EdgeMesh>(),
-        //    ResourceLoader.edgeMeshes["cube"].Clone<EdgeMesh>()
-        //];
-        //meshes[0].TranslateX(-1.5f);
-        //meshes[1].TranslateX(1.5f);
-        //Renderer.renderObjects.Add(meshes[0]);
-        //Renderer.renderObjects.Add(meshes[1]);
-        //Window.curr!.update += dt => {
-        //    foreach(var m in meshes)
-        //    {
-        //        m.RotateY(dt);
-        //        m.scl = new((MathF.Sin(Window.ticksPassed / Window.curr!.targeTps) + 1f) / 2f);
-        //    }
-        //};
+        EdgeMesh[] meshes = [
+            ResourceLoader.edgeMeshes["cube"].Clone<EdgeMesh>(),
+            ResourceLoader.edgeMeshes["cube"].Clone<EdgeMesh>()
+        ];
+        meshes[0].TranslateX(-1.5f);
+        meshes[1].TranslateX(1.5f);
+        Renderer.renderObjects.Add(meshes[0]);
+        Renderer.renderObjects.Add(meshes[1]);
+        Window.curr!.update += dt => {
+            foreach(var m in meshes)
+            {
+                m.RotateY(dt);
+                m.scl = new((MathF.Sin(Window.ticksPassed / Window.curr!.targeTps) + 1f) / 2f);
+            }
+        };
 
         //EdgeMesh em = ResourceLoader.edgeMeshes["th_txt"].Clone<EdgeMesh>();
         //Window.curr!.update += em.RotateY;
