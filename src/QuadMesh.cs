@@ -17,10 +17,10 @@ public class QuadMesh(Vec3f[] vertices, QuadMesh.Quad[] quads) : Mesh(vertices)
         public static float Dist(Quad q, Mesh mesh)
         {
             Vec3f[] points = (from p in new Vec3f[] {
-                mesh.vertices[q.a],
-                mesh.vertices[q.b],
-                mesh.vertices[q.c],
-                mesh.vertices[q.d]
+                mesh[q.a],
+                mesh[q.b],
+                mesh[q.c],
+                mesh[q.d]
             } select Renderer.camPos - p).ToArray();;
 
             float avg = 0f;
@@ -34,7 +34,7 @@ public class QuadMesh(Vec3f[] vertices, QuadMesh.Quad[] quads) : Mesh(vertices)
     public Quad[] quads = quads;
 
 
-    public QuadMesh(Mesh mesh, Quad[] quads) : this((Vec3f[])mesh.vertices.Clone(), quads) { }
+    public QuadMesh(Mesh mesh, Quad[] quads) : this(mesh.CopyVertices(), quads) { }
 
 
     internal override void DrawToScreen(Graphics canvas)

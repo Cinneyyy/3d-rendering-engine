@@ -10,7 +10,7 @@ public class EdgeMesh(Vec3f[] vertices, EdgeMesh.Edge[] edges) : Mesh(vertices)
     public Edge[] edges = edges;
 
 
-    public EdgeMesh(Mesh mesh, Edge[] edges) : this((Vec3f[])mesh.vertices.Clone(), edges) { }
+    public EdgeMesh(Mesh mesh, Edge[] edges) : this(mesh.CopyVertices(), edges) { }
 
 
     internal override void DrawToScreen(Graphics canvas)

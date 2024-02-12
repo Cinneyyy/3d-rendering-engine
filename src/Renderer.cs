@@ -27,9 +27,7 @@ public static class Renderer
 
 
     static Renderer()
-    {
-        obj = ObjLoader.LoadToEdgeMesh(Assembly.GetExecutingAssembly()!.GetManifestResourceStream("res.Models.cube.obj")!);
-    }
+        => obj = ObjLoader.LoadToEdgeMesh(Assembly.GetExecutingAssembly()!.GetManifestResourceStream("res.Models.monke.obj")!);
 
 
     public static void Tick(object? sender, ElapsedEventArgs args)
@@ -150,7 +148,7 @@ public static class Renderer
         if(Input.KeyHelt(Keys.I)) fov += Window.deltaTime;
         if(Input.KeyHelt(Keys.U)) fov -= Window.deltaTime;
 
-        objRot += new Vec3f(0f, Window.deltaTime, 0f);
+        objRot += new Vec3f(Window.deltaTime);
 
         // Project
         //cubeEdges.projectionBuffer =
@@ -162,8 +160,8 @@ public static class Renderer
 
         // Project
         obj.projectionBuffer =
-            (from v in obj.vertices
-             let proj = (PointF)WorldToScreen(Project3dPoint(v, objRot, obj.center, camPos, camRot, fov))
+            (from v in obj.GetVertices()
+             let proj = (PointF)WorldToScreen(Project3dPoint(v, objRot, obj.anchor, obj.offset, camPos, camRot, fov))
              select proj with { Y = ScreenH - proj.Y })
             .ToArray();
         obj.DrawToScreen(canvas);
@@ -185,9 +183,9 @@ public static class Renderer
         canvas.DrawString(Window.tps.ToString("00"), new Font(FontFamily.GenericMonospace, 10), Brushes.White, 3, 3);
     }
 
-    private static Vec2f Project3dPoint(Vec3f pt, Vec3f ptRot, Vec3f ptRotOrigin, Vec3f camPos, Vec3f camRot, float fov)
+    private static Vec2f Project3dPoint(Vec3f pt, Vec3f ptRot, Vec3f ptRotOrigin, Vec3f objOffset, Vec3f camPos, Vec3f camRot, float fov)
     {
-        Vec3f rotated = RotateYXZ(RotateYXZ(pt, ptRot) - camPos, camRot);
+        Vec3f rotated = RotateYXZ(RotateYXZ(pt - ptRotOrigin, ptRot) - camPos + objOffset, camRot);
         Vec3f translated = rotated - new Vec3f(0f, 0f, fov);
         return Project(translated, fov);
     }
