@@ -62,13 +62,10 @@ public record struct Vec3f(float x, float y, float z) : IEnumerable<float>
     public static float Dot(Vec3f a, Vec3f b)
         => a.x*b.x + a.y*b.y + a.z*b.z;
 
-    public static Vec3f FromEulerRotation(Vec3f rot)
-        => new(MathF.Sin(rot.x), MathF.Sin(rot.y), MathF.Sin(rot.z));
-
     public static Vec3f RotateX(Vec3f v, float rot)
-    => new(v.x,
-           MathF.Cos(rot) * v.y - MathF.Sin(rot) * v.z,
-           MathF.Sin(rot) * v.y + MathF.Cos(rot) * v.z);
+        => new(v.x,
+               MathF.Cos(rot) * v.y - MathF.Sin(rot) * v.z,
+               MathF.Sin(rot) * v.y + MathF.Cos(rot) * v.z);
 
     public static Vec3f RotateY(Vec3f v, float rot)
         => new(MathF.Cos(rot) * v.x - MathF.Sin(rot) * v.z,
@@ -81,46 +78,12 @@ public record struct Vec3f(float x, float y, float z) : IEnumerable<float>
                v.z);
 
     public static Vec3f RotateYXZ(Vec3f v, Vec3f rot)
-    {
-        /*
-        Vec3f y = new(
-            MathF.Cos(rot.y) * v.x - MathF.Sin(rot.y) * v.z,
-            v.y,
-            MathF.Sin(rot.y) * v.x + MathF.Cos(rot.y) * v.z);
-
-        Vec3f x =  new(
-            y.x,
-            MathF.Cos(rot.x) * y.y - MathF.Sin(rot.x) * y.z,
-            MathF.Sin(rot.x) * y.y + MathF.Cos(rot.x) * y.z);
-
-        Vec3f z = new(
-            MathF.Cos(rot.z) * x.x - MathF.Sin(rot.z) * x.y,
-            MathF.Sin(rot.z) * x.x + MathF.Cos(rot.z) * x.y,
-            x.z);
-
-        Vec3f xyz = new(
-            MathF.Cos(rot.z) * (MathF.Cos(rot.y) * v.x - MathF.Sin(rot.y) * v.z) - MathF.Sin(rot.z) * (MathF.Cos(rot.x) * v.y - MathF.Sin(rot.x) * (MathF.Sin(rot.y) * v.x + MathF.Cos(rot.y) * v.z)),
-            MathF.Sin(rot.z) * (MathF.Cos(rot.y) * v.x - MathF.Sin(rot.y) * v.z) + MathF.Cos(rot.z) * (MathF.Cos(rot.x) * v.y - MathF.Sin(rot.x) * (MathF.Sin(rot.y) * v.x + MathF.Cos(rot.y) * v.z)),
-            MathF.Sin(rot.x) * v.y + MathF.Cos(rot.x) * (MathF.Sin(rot.y) * v.x + MathF.Cos(rot.y) * v.z));
-        */
-
-        return RotateZ(RotateX(RotateY(v, rot.y), rot.x), rot.z).normalized;
-    }
+        => RotateZ(RotateX(RotateY(v, rot.y), rot.x), rot.z).normalized;
 
     #region Do not touch !!
-    public static Vec3f EulerToVector(float xRotation, float yRotation, float zRotation)
-    {
-        // Convert Euler angles to rotation matrix
-        float[,] rotationMatrix = EulerToRotationMatrix(-xRotation, yRotation, zRotation);
-
-        // Apply rotation matrix to unit vector
-        Vec3f rotatedVector = new Vec3f(
-            rotationMatrix[0, 2],  // x component of the rotated vector
-            rotationMatrix[1, 2],  // y component of the rotated vector
-            rotationMatrix[2, 2]); // z component of the rotated vector
-
-        return rotatedVector.normalized;
-    }
+    public static Vec3f FromEulerToForward(Vec3f rot) => EulerToForwardVector(rot.x, rot.y, rot.z);
+    public static Vec3f FromEulerToRight(Vec3f rot) => EulerToRightVector(rot.x, rot.y, rot.z);
+    public static Vec3f FromEulerToUp(Vec3f rot) => EulerToUpVector(rot.x, rot.y, rot.z);
 
     private static float[,] EulerToRotationMatrix(float xRotation, float yRotation, float zRotation)
     {
@@ -169,6 +132,24 @@ public record struct Vec3f(float x, float y, float z) : IEnumerable<float>
         }
 
         return result;
+    }
+
+    private static Vec3f EulerToForwardVector(float xRotation, float yRotation, float zRotation)
+    {
+        float[,] rotationMatrix = EulerToRotationMatrix(-xRotation, yRotation, zRotation);
+        return new Vec3f(rotationMatrix[0, 2], rotationMatrix[1, 2], rotationMatrix[2, 2]).normalized;
+    }
+
+    private static Vec3f EulerToRightVector(float xRotation, float yRotation, float zRotation)
+    {
+        float[,] rotationMatrix = EulerToRotationMatrix(-xRotation, yRotation, zRotation);
+        return new Vec3f(rotationMatrix[0, 0], rotationMatrix[1, 0], rotationMatrix[2, 0]).normalized;
+    }
+
+    private static Vec3f EulerToUpVector(float xRotation, float yRotation, float zRotation)
+    {
+        float[,] rotationMatrix = EulerToRotationMatrix(-xRotation, yRotation, zRotation);
+        return new Vec3f(rotationMatrix[0, 1], rotationMatrix[1, 1], rotationMatrix[2, 1]).normalized;
     }
     #endregion
 

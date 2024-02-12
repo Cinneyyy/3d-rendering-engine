@@ -26,9 +26,7 @@ public static class Input
     }
 
     public static void Init()
-    {
-        lastCursor = Window.curr!.center;
-    }
+        => lastCursor = Window.curr!.center;
 
 
     internal static void OnKeyDown(object? sender, KeyEventArgs args)

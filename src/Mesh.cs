@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using WPP = src.WeakPerspectiveProjector;
 
 namespace src;
 
-public class Mesh(params Vec3f[] vertices) : WorldObject()
+public abstract class Mesh(params Vec3f[] vertices) : WorldObject(), IRenderableObject
 {
-    private Vec3f[] vertices = vertices;
+    private protected PointF[] projectionBuffer = [];
 
-    public PointF[] projectionBuffer = [];
+    private Vec3f[] vertices = vertices;
 
 
     public Vec3f anchor
@@ -36,12 +37,34 @@ public class Mesh(params Vec3f[] vertices) : WorldObject()
 
     public IEnumerable<Vec3f> GetVertices()
         => from v in vertices
-           select v + pos;
+           select v * scl + pos;
 
     public Vec3f[] CopyVertices()
         => (Vec3f[])vertices.Clone();
 
+    void IRenderableObject.RenderToScreen(Graphics canvas)
+    {
+        Vec3f anchor = this.anchor;
 
-    internal virtual void DrawToScreen(Graphics canvas) 
-        => throw new NotImplementedException("DrawToScreen was not overriden");
+        projectionBuffer =
+            (from v in GetVertices()
+             let proj = (PointF)Renderer.WorldToScreen(WPP.Project3dPoint(v, rot, anchor, pos, Renderer.cam.pos, Renderer.cam.rot, Renderer.cam.fov))
+             select proj with { Y = Renderer.ScreenH - proj.Y })
+            .ToArray();
+
+        DrawToScreen(canvas);
+    }
+
+
+    private protected override WorldObject CopyWorldObjectChild()
+    {
+        Mesh clone = CopyMeshChild();
+        clone.vertices = CopyVertices();
+        clone.projectionBuffer = new PointF[projectionBuffer.Length];
+        return clone;
+    }
+
+    private protected abstract Mesh CopyMeshChild();
+
+    private protected abstract void DrawToScreen(Graphics canvas);
 }

@@ -24,27 +24,29 @@ public class Window
 
 
 
+
+    private const string IconPath = ResourceLoader.Path.App + "appicon.ico";
+
+    private static readonly Icon icon = new(Assembly.GetExecutingAssembly().GetManifestResourceStream(IconPath)!);
+
     public readonly Canvas canvas;
     public readonly Vec2i center;
     public readonly float upscaleFactor, downscaleFactor;
 
-    private const string IconPath = SpriteLoader.Path.App + "appicon.ico";
-
-    private static readonly Icon icon = new(Assembly.GetExecutingAssembly().GetManifestResourceStream(IconPath)!);
-
     private readonly ST::Timer tickTimer;
     private readonly Vec2i renderSize;
     private readonly int yRenderOffset;
-
     private DateTime tpscLastTick;
     private int tpscCounter;
     private float tpscTimeCounter;
+    private float _targetTps;
 
 
     public static Window? curr { get; private set; } = null;
     public static bool running { get; private set; } = false;
     public static float tps { get; private set; }
     public static float deltaTime { get; private set; }
+    public static int ticksPassed { get; private set; }
 
 
     public Vec2i size { get; private set; } = new();
@@ -55,9 +57,19 @@ public class Window
         add => tickTimer.Elapsed += value;
         remove => tickTimer.Elapsed -= value;
     }
+    public event Action<float> update
+    {
+        add => tick += (_, _) => value(deltaTime);
+        remove => tick -= (_, _) => value(deltaTime);
+    }
+    public float targeTps
+    {
+        get => _targetTps;
+        set => tickTimer.Interval = 1000d / (_targetTps = value);
+    }
 
 
-    public Window(string title, float cycleTps)
+    public Window(string title, float targetTps)
     {
         this.title = title;
         curr = this;
@@ -90,10 +102,12 @@ public class Window
         (tickTimer = new() {
             AutoReset = true,
             Enabled = true,
-            Interval = 1000d / cycleTps
+            Interval = 1000d / (_targetTps = targetTps)
         }).Start();
 
         tick += (_, _) => {
+            ticksPassed++;
+
             deltaTime = (float)(DateTime.Now - tpscLastTick).TotalSeconds;
             tpscLastTick = DateTime.Now;
 

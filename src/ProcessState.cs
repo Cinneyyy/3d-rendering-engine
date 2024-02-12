@@ -12,9 +12,32 @@ public static class ProcessState
     }
 
 
-    public static void Tick(object? sender, EventArgs args)
+    static ProcessState()
     {
-        if(Input.KeyDown(Keys.Escape))
+        EdgeMesh[] meshes = [
+            ResourceLoader.edgeMeshes["cube"].Clone<EdgeMesh>(),
+            ResourceLoader.edgeMeshes["cube"].Clone<EdgeMesh>()
+        ];
+        meshes[0].TranslateX(-1.5f);
+        meshes[1].TranslateX(1.5f);
+        Renderer.renderObjects.Add(meshes[0]);
+        Renderer.renderObjects.Add(meshes[1]);
+        Window.curr!.update += dt => {
+            foreach(var m in meshes)
+            {
+                m.RotateY(dt);
+                m.scl = new((MathF.Sin(Window.ticksPassed / Window.curr!.targeTps) + 1f) / 2f);
+            }
+        };
+
+        //EdgeMesh em = ResourceLoader.edgeMeshes["th_txt"].Clone<EdgeMesh>();
+        //Renderer.renderObjects.Add(em);
+    }
+
+
+    public static void Tick(float dt)
+    {
+        if(Input.KeyHelt(Keys.Escape))
         {
             Window.Exit();
             return;
@@ -26,21 +49,23 @@ public static class ProcessState
         if(Input.KeyDown(Keys.F2))
             Input.lockCursor ^= true;
 
-        if(Input.KeyHelt(Keys.Left)) cam.rot.y -= Window.deltaTime;
-        if(Input.KeyHelt(Keys.Right)) cam.rot.y += Window.deltaTime;
-        if(Input.KeyHelt(Keys.Up)) cam.rot.x += Window.deltaTime;
-        if(Input.KeyHelt(Keys.Down)) cam.rot.x -= Window.deltaTime;
+        if(Input.KeyHelt(Keys.Left)) cam.rot.y -= dt;
+        if(Input.KeyHelt(Keys.Right)) cam.rot.y +=dt;
+        if(Input.KeyHelt(Keys.Up)) cam.rot.x += dt;
+        if(Input.KeyHelt(Keys.Down)) cam.rot.x -= dt;
+        cam.rot %= MathF.Tau;
+        cam.rot.x = UtilFuncs.Clamp(cam.rot.x, -MathF.PI/2f, MathF.PI/2f);
 
         Vec3f move = new();
-        if(Input.KeyHelt(Keys.W)) move.z += Window.deltaTime;
-        if(Input.KeyHelt(Keys.S)) move.z -= Window.deltaTime;
-        if(Input.KeyHelt(Keys.D)) move.x += Window.deltaTime;
-        if(Input.KeyHelt(Keys.A)) move.x -= Window.deltaTime;
-        if(Input.KeyHelt(Keys.Space)) move.y += Window.deltaTime;
-        if(Input.KeyHelt(Keys.ShiftKey)) move.y -= Window.deltaTime;
+        if(Input.KeyHelt(Keys.W)) move.z += dt;
+        if(Input.KeyHelt(Keys.S)) move.z -= dt;
+        if(Input.KeyHelt(Keys.D)) move.x += dt;
+        if(Input.KeyHelt(Keys.A)) move.x -= dt;
+        if(Input.KeyHelt(Keys.Space)) move.y += dt;
+        if(Input.KeyHelt(Keys.ShiftKey)) move.y -= dt;
         cam.pos += cam.forward * move.z + cam.right * move.x + cam.up * move.y;
 
-        if(Input.KeyHelt(Keys.I)) cam.fov += Window.deltaTime;
-        if(Input.KeyHelt(Keys.U)) cam.fov -= Window.deltaTime;
+        if(Input.KeyHelt(Keys.I)) cam.fov += dt;
+        if(Input.KeyHelt(Keys.U)) cam.fov -= dt;
     }
 }

@@ -15,6 +15,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="res\Models\text_medium.obj" />
+    <None Remove="res\Models\text_thin.obj" />
     <None Remove="res\Models\torus.obj" />
     <None Remove="res\App\appicon.ico" />
     <None Remove="res\App\bk.PNG" />
@@ -29,6 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="res\Models\text_medium.obj" />
+    <EmbeddedResource Include="res\Models\text_thin.obj" />
     <EmbeddedResource Include="res\Models\torus.obj" />
     <EmbeddedResource Include="res\App\appicon.ico" />
     <EmbeddedResource Include="res\App\bk.PNG" />

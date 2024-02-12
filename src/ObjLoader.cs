@@ -9,13 +9,13 @@ public static class ObjLoader
     private static readonly char[] separator = [' '];
 
 
-    public static EdgeMesh LoadToEdgeMesh(Stream data)
+    public static EdgeMesh LoadToEdgeMesh(Stream data, bool makeOnlyNecesseryEdges)
     {
         using(StreamReader reader = new(data))
-            return LoadToEdgeMesh(reader.ReadToEnd().Split(Environment.NewLine.ToCharArray()));
+            return LoadToEdgeMesh(reader.ReadToEnd().Split(Environment.NewLine.ToCharArray()), makeOnlyNecesseryEdges);
     }
 
-    public static EdgeMesh LoadToEdgeMesh(string[] data)
+    public static EdgeMesh LoadToEdgeMesh(string[] data, bool makeOnlyNecesseryEdges)
     {
         List<Vec3f> vertices = [];
         List<int[]> faces = [];
@@ -48,11 +48,9 @@ public static class ObjLoader
         }
 
         List<EdgeMesh.Edge> edges = [];
-        const bool make_all_possible_connections = false;
-#pragma warning disable CS0162
         foreach(int[] f in faces)
         {
-            if(!make_all_possible_connections)
+            if(makeOnlyNecesseryEdges)
                 for(int i = 0; i < f.Length; i++)
                     edges.Add(new EdgeMesh.Edge(f[i], f[(i+1) % f.Length]));
             else

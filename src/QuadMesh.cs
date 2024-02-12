@@ -37,7 +37,13 @@ public class QuadMesh(Vec3f[] vertices, QuadMesh.Quad[] quads) : Mesh(vertices)
     public QuadMesh(Mesh mesh, Quad[] quads) : this(mesh.CopyVertices(), quads) { }
 
 
-    internal override void DrawToScreen(Graphics canvas)
+    private protected override Mesh CopyMeshChild()
+    {
+        QuadMesh qm = new([], quads.CloneArr());
+        return qm;
+    }
+
+    private protected override void DrawToScreen(Graphics canvas)
     {
         PointF[] points = new PointF[4];
         Array.Sort(quads, (a, b) => (int)((Quad.Dist(b, this) - Quad.Dist(a, this))) * 100);

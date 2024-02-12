@@ -14,7 +14,6 @@ public class Program
         try
         {
             ConsoleWindow.Hide();
-            SpriteLoader.Load();
 
             //Vec2 physicalScreen = new(Screen.PrimaryScreen?.Bounds.Width ?? Renderer.ScreenW, Screen.PrimaryScreen?.Bounds.Height ?? Renderer.ScreenH);
             //float winScale = Window.ScreenCoverage / 100f * (physicalScreen.y / Renderer.ScreenH);
@@ -24,7 +23,7 @@ public class Program
 
             Input.Init();
 
-            win.tick += ProcessState.Tick!;
+            win.update += ProcessState.Tick!;
             win.tick += Renderer.Tick!;
             win.tick += Input.FinishTick!;
         }

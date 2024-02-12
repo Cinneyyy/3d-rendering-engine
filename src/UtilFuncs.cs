@@ -57,4 +57,7 @@ public static class UtilFuncs
         graphics.SetClip(path);
         graphics.DrawImage(image, 0f, 0f);
     }
+
+    public static T[] CloneArr<T>(this T[] src)
+        => (T[])src.Clone();
 }

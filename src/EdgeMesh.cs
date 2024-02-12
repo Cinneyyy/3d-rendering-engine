@@ -13,9 +13,15 @@ public class EdgeMesh(Vec3f[] vertices, EdgeMesh.Edge[] edges) : Mesh(vertices)
     public EdgeMesh(Mesh mesh, Edge[] edges) : this(mesh.CopyVertices(), edges) { }
 
 
-    internal override void DrawToScreen(Graphics canvas)
+    private protected override void DrawToScreen(Graphics canvas)
     {
         foreach(Edge e in edges)
             canvas.DrawLine(new(Brushes.White), projectionBuffer[e.a], projectionBuffer[e.b]);
+    }
+
+    private protected override Mesh CopyMeshChild()
+    {
+        EdgeMesh em = new([], edges.CloneArr());
+        return em;
     }
 }
