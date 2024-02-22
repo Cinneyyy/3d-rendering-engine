@@ -100,8 +100,8 @@ public class MeshRenderer(Mesh? mesh = null) : WorldObject, IRenderableObject
             canvas.DrawLine(pen, projBuff[tris[i].a], projBuff[tris[i].b]);
             canvas.DrawLine(pen, projBuff[tris[i].b], projBuff[tris[i].c]);
             canvas.DrawLine(pen, projBuff[tris[i].c], projBuff[tris[i].a]);
-            
-            //canvas.FillPolygon(tris[i].brush, new Point[] { projBuff[tris[i].a], projBuff[tris[i].b], projBuff[tris[i].c] });
+
+            canvas.FillPolygon(tris[i].brush, new Point[] { projBuff[tris[i].a], projBuff[tris[i].b], projBuff[tris[i].c] });
         }
     }
 }

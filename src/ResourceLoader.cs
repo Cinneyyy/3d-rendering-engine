@@ -31,6 +31,7 @@ public static class ResourceLoader
 
         (ResType.Mesh, "monke", Path.MODELS + "monke.obj"),
         (ResType.Mesh, "cube", Path.MODELS + "cube.obj"),
+        (ResType.Mesh, "dino", Path.MODELS + "dino.obj"),
         //(ResType.QuadMesh, "torus", Path.Models + "torus.obj"),
         //(ResType.QuadMesh, "th_txt", Path.Models + "text_thin.obj"),
         //(ResType.QuadMesh, "md_txt", Path.Models + "text_medium.obj"),

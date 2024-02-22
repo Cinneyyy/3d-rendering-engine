@@ -123,8 +123,8 @@ public class Window
     }
 
 
-    public void Refresh() =>
-        canvas.BeginInvoke((SWF::MethodInvoker)canvas.Refresh);
+    public void Refresh() 
+        => canvas.BeginInvoke((SWF::MethodInvoker)canvas.Refresh);
 
 
     private void OnPaint(object sender, PaintEventArgs args)

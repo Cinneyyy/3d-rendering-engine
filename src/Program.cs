@@ -23,7 +23,8 @@ public class Program
 
             Input.Init();
 
-            MeshRenderer mr = new(ResourceLoader.meshes["cube"]);
+            MeshRenderer mr = new(ResourceLoader.meshes["dino"]);
+            mr.RotateX(90f);
             (mr as IRenderableObject).EnableRendering(true);
 
             win.update += ProcessState.Tick!;

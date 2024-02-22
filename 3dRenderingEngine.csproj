@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="res\Models\dino.obj" />
     <None Remove="res\Models\text_medium.obj" />
     <None Remove="res\Models\text_thin.obj" />
     <None Remove="res\Models\torus.obj" />
@@ -31,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="res\Models\dino.obj" />
     <EmbeddedResource Include="res\Models\text_medium.obj" />
     <EmbeddedResource Include="res\Models\text_thin.obj" />
     <EmbeddedResource Include="res\Models\torus.obj" />
