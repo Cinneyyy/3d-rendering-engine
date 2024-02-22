@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Reflection;
+using System.Text;
 
 namespace src;
 
@@ -60,4 +61,18 @@ public static class UtilFuncs
 
     public static T[] CloneArr<T>(this T[] src)
         => (T[])src.Clone();
+
+    public static string FormatStr<T>(this T[] arr, string seperator)
+    {
+        StringBuilder sb = new();
+
+        for(int i = 0; i < arr.Length; i++)
+        {
+            sb.Append(arr[i]);
+            if(i < arr.Length - 1)
+                sb.Append(seperator);
+        }
+
+        return sb.ToString();
+    }
 }

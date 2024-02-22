@@ -1,4 +1,5 @@
 ﻿global using static src.Globals;
+global using WPP = src.WeakPerspectiveProjector;
 
 using System;
 

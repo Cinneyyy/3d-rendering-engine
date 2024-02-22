@@ -23,6 +23,9 @@ public class Program
 
             Input.Init();
 
+            MeshRenderer mr = new(ResourceLoader.meshes["cube"]);
+            (mr as IRenderableObject).EnableRendering(true);
+
             win.update += ProcessState.Tick!;
             win.tick += Renderer.Tick!;
             win.tick += Input.FinishTick!;

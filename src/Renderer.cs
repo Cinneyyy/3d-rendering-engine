@@ -3,28 +3,33 @@ using System.Timers;
 using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System;
 
 namespace src;
 
-#pragma warning disable CA2211
+#pragma warning disable CA2211, IDE0052
 public static class Renderer
 {
-    public const int ScreenW = 384;
-    public const int ScreenH = 216;
-    public const int CenterX = ScreenW/2;
-    public const int CenterY = ScreenH/2;
+    public const int SCREEN_W = 384;
+    public const int SCREEN_H = 216;
+    public const int CENTER_X = SCREEN_W/2;
+    public const int CENTER_Y = SCREEN_H/2;
+    public const int LAYER_COUNT = 8;
 
-    public static readonly Vec2f screenSize = new(ScreenW, ScreenH);
-    public static readonly Vec2f screenCenter = new(CenterX, CenterY);
-    public static readonly Bitmap screen = new(ScreenW, ScreenH);
-    public static readonly List<IRenderableObject> renderObjects = [];
+    private const float FRAME_HALT_LENIENCY = 2.5f;
+
+    public static readonly Vec2f screenSize = new(SCREEN_W, SCREEN_H);
+    public static readonly Vec2f screenCenter = new(CENTER_X, CENTER_Y);
+    public static readonly Bitmap screen = new(SCREEN_W, SCREEN_H);
+    public static readonly List<IRenderableObject>[] renderObjects = new List<IRenderableObject>[LAYER_COUNT];
     public static Camera cam = new(new(0f, 0f, -3f), Vec3f.zero, 90f);
 
     private static readonly Graphics canvas = Graphics.FromImage(screen);
-
     private static bool drawing = false;
-    private static ulong frameCount = 0;
-    private static ulong frameSkips = 0;
+
+
+    public static ulong frameCount { get; private set; } = 0;
+    public static ulong frameSkips { get; private set; } = 0;
 
 
     public static void Tick(object? sender, ElapsedEventArgs args)
@@ -36,17 +41,17 @@ public static class Renderer
             if(!drawing)
             {
                 frameCount++;
-                PreventFrameHalt(frameCount, 100);
+                PreventFrameHalt(frameCount, (int)(FRAME_HALT_LENIENCY * Window.curr!.targetInterval));
 
                 drawing = true;
                 try
                 {
                     Draw();
                 }
-                catch//(Exception e)
+                catch(System.Exception e)
                 {
                     drawing = false;
-                    //Out($"Error at frame #{frameCount}: {e}");
+                    Out($"Error at frame #{frameCount}: {e}");
                     return;
                 }
 
@@ -57,11 +62,26 @@ public static class Renderer
     }
 
 
-    public static Vec2f ToCenter(Vec2f pos) => screenCenter + pos;
-    public static Vec2i ToCenter(Vec2i pos) => screenCenter.Round() + pos;
+    public static Vec2f OffsetToCenter(Vec2f pos) => screenCenter + pos;
+    public static Vec2i OffsetToCenter(Vec2i pos) => screenCenter.Round() + pos;
 
-    public static Vec2f WorldToScreen(Vec2f pt)
-        => (pt + Vec2f.one) / 2f * ScreenH + new Vec2f(CenterY, 0);
+    public static Vec2f WorldToScreen(Vec2f pt, out bool oob)
+    {
+        oob = false;
+        pt = (pt + Vec2f.one) / 2f;
+        pt *= SCREEN_H;
+        pt += new Vec2f(CENTER_Y, 0f);
+        pt.y = SCREEN_H - pt.y;
+        return pt;
+    }
+
+    public static void RegisterRenderer(IRenderableObject renderableObject, int layer)
+    {
+        Out($"Registered new renderer");
+        if(renderObjects[layer] == null) renderObjects[layer] = [];
+        renderObjects[layer].Add(renderableObject);
+    }
+    public static void UnregisterRenderer(IRenderableObject renderableObject, int layer) => renderObjects[layer].Remove(renderableObject);
 
 
     private static async void PreventFrameHalt(ulong currFrame, int delay)
@@ -71,7 +91,7 @@ public static class Renderer
         {
             drawing = false;
             frameSkips++;
-            //Out($"Frame skip #{frameSkips} ({UtilFuncs.AddSuffix(currFrame)} frame)");
+            Out($"Frame skip #{frameSkips} ({UtilFuncs.AddSuffix(currFrame)} frame)");
         }
     }
 
@@ -79,8 +99,10 @@ public static class Renderer
     {
         canvas.Clear(Color.Black);
 
-        foreach(var o in renderObjects)
-            o.RenderToScreen(canvas);
+        foreach(var oList in renderObjects)
+            if(oList != null)
+                foreach(var o in oList)
+                    o.RenderToScreen(canvas, cam);
 
         canvas.DrawString(Window.tps.ToString("00"), new Font(FontFamily.GenericMonospace, 10), Brushes.White, 3, 3);
     }

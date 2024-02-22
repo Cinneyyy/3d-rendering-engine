@@ -5,6 +5,7 @@ using System.Windows.Forms;
 
 namespace src;
 
+#pragma warning disable IDE0052
 public static class Input
 {
     private static readonly Dictionary<Keys, bool> keyState = [];

@@ -20,12 +20,12 @@ public static class ConsoleCommands
                     _ => ConsoleWindow.windowMode
                 }; break;
 
-                default: Output($"Unknown command '{split[0]}'"); break;
+                default: Out($"Unknown command '{split[0]}'"); break;
             }
         }
         catch(Exception exc)
         {
-            Output(exc.ToString());
+            Out(exc.ToString());
         }
     }
 
@@ -34,6 +34,4 @@ public static class ConsoleCommands
         while(Window.running)
             Receive(Console.ReadLine()!);
     }
-
-    public static void Output(string s) => ConsoleWindow.Output(s);
 }

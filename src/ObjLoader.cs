@@ -1,22 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System;
-using System.Drawing;
 
 namespace src;
 
 public static class ObjLoader
 {
-    private static readonly char[] separator = [' '];
+    private static readonly char[] newline = Environment.NewLine.ToCharArray();
 
 
-    public static EdgeMesh LoadToEdgeMesh(Stream data, bool makeOnlyNecesseryEdges)
+    public static Mesh LoadObjFile(Stream data)
     {
         using(StreamReader reader = new(data))
-            return LoadToEdgeMesh(reader.ReadToEnd().Split(Environment.NewLine.ToCharArray()), makeOnlyNecesseryEdges);
+            return LoadObjFile(reader.ReadToEnd().Split(newline));
     }
-
-    public static EdgeMesh LoadToEdgeMesh(string[] data, bool makeOnlyNecesseryEdges)
+    public static Mesh LoadObjFile(string[] data)
     {
         List<Vec3f> vertices = [];
         List<int[]> faces = [];
@@ -28,88 +26,38 @@ public static class ObjLoader
             if(split.Length <= 1)
                 continue;
 
-            switch(split[0])
+            if(split[0] == "v")
+                vertices.Add(new(
+                    float.Parse(split[1]),
+                    float.Parse(split[2]),
+                    float.Parse(split[3])));
+            else if(split[0] == "f")
             {
-                case "v":
-                    vertices.Add(new(
-                        float.Parse(split[1]),
-                        float.Parse(split[2]),
-                        float.Parse(split[3])));
-                    break;
-
-                case "f":
-                {
-                    int[] face = new int[split.Length-1];
-                    for(int i = 1; i < split.Length; i++)
-                        face[i-1] = int.Parse(split[i].Split('/')[0].ToString()) - 1;
-                    faces.Add(face);
-                    break;
-                }
+                int[] face = new int[split.Length-1];
+                for(int i = 1; i < split.Length; i++)
+                    face[i-1] = int.Parse(split[i].Split('/')[0]) - 1;
+                faces.Add(face);
             }
-        }
-
-        List<EdgeMesh.Edge> edges = [];
-        foreach(int[] f in faces)
-        {
-            if(makeOnlyNecesseryEdges)
-                for(int i = 0; i < f.Length; i++)
-                    edges.Add(new EdgeMesh.Edge(f[i], f[(i+1) % f.Length]));
             else
-                for(int i = 0; i < f.Length; i++)
-                    for(int j = 0; j < f.Length; j++)
-                        if(i != j)
-                        {
-                            EdgeMesh.Edge e = new(f[i], f[j]);
-                            if(!edges.Contains(e))
-                                edges.Add(e);
-                        }
+                continue;
         }
 
-        return new([.. vertices], [.. edges]);
-    }
-    public static QuadMesh LoadToQuadMesh(Stream data)
-    {
-        using(StreamReader reader = new(data))
-            return LoadToQuadMesh(reader.ReadToEnd().Split(Environment.NewLine.ToCharArray()));
-    }
-
-    public static QuadMesh LoadToQuadMesh(string[] data)
-    {
-        List<Vec3f> vertices = [];
-        List<int[]> faces = [];
-
-        foreach(string ln in data)
+        List<Tri> tris = [];
+        foreach(int[] f in faces)
         {
-            string[] split = ln.Split();
-
-            if(split.Length <= 1)
-                continue;
-
-            switch(split[0])
+            switch(f.Length)
             {
-                case "v":
-                    vertices.Add(new(
-                        float.Parse(split[1]),
-                        float.Parse(split[2]),
-                        float.Parse(split[3])));
+                case 3:
+                    tris.Add(new(f[0], f[1], f[2])); 
                     break;
-
-                case "f":
-                {
-                    int[] face = new int[split.Length-1];
-                    for(int i = 1; i < split.Length; i++)
-                        face[i-1] = int.Parse(split[i].Split('/')[0].ToString()) - 1;
-                    faces.Add(face);
+                case 4:
+                    tris.Add(new(f[0], f[1], f[3]));
+                    tris.Add(new(f[1], f[2], f[3]));
                     break;
-                }
+                default: throw new($"Invalid number of vertices ({f.Length}) on face: [{f.FormatStr(", ")}]");
             }
         }
 
-        List<QuadMesh.Quad> quads = [];
-        Random rand = new();
-        foreach(int[] f in faces)
-            quads.Add(new(f[0], f[1], f[2], f[3], new SolidBrush(Color.FromArgb(0xAAAAAA | ((byte)(0xFF * rand.NextSingle()) << 24)))));
-
-        return new([.. vertices], [.. quads]);
+        return new([.. vertices], [.. tris]);
     }
 }

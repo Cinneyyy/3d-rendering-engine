@@ -12,22 +12,9 @@ namespace src;
 
 public class Window
 {
-    public class Canvas : Form
-    {
-        public Canvas()
-            => DoubleBuffered = true;
+    private const string ICON_PATH = ResourceLoader.Path.APP + "appicon.ico";
 
-
-        public void Center()
-            => CenterToScreen();
-    }
-
-
-
-
-    private const string IconPath = ResourceLoader.Path.App + "appicon.ico";
-
-    private static readonly Icon icon = new(Assembly.GetExecutingAssembly().GetManifestResourceStream(IconPath)!);
+    private static readonly Icon icon = new(Assembly.GetExecutingAssembly().GetManifestResourceStream(ICON_PATH)!);
 
     public readonly Canvas canvas;
     public readonly Vec2i center;
@@ -40,6 +27,7 @@ public class Window
     private int tpscCounter;
     private float tpscTimeCounter;
     private float _targetTps;
+    private float _targetInterval;
 
 
     public static Window? curr { get; private set; } = null;
@@ -65,7 +53,12 @@ public class Window
     public float targeTps
     {
         get => _targetTps;
-        set => tickTimer.Interval = 1000d / (_targetTps = value);
+        set => _targetInterval = (float)(tickTimer.Interval = 1000d / (_targetTps = value));
+    }
+    public float targetInterval
+    {
+        get => _targetInterval;
+        set => _targetTps = 1000f / (float)(tickTimer.Interval = (double)(_targetInterval = value));
     }
 
 
@@ -85,13 +78,13 @@ public class Window
             Icon = icon
         };
 
-        size = new(canvas.Size.Width, (int)(canvas.Size.Width * ((float)Renderer.ScreenH / Renderer.ScreenW)));
+        size = new(canvas.Size.Width, (int)(canvas.Size.Width * ((float)Renderer.SCREEN_H / Renderer.SCREEN_W)));
         renderSize = size - new Vec2i(2);
         yRenderOffset = (canvas.Size.Height - size.y) / 2;
 
         center = size/2;
-        upscaleFactor = size.x/(float)Renderer.ScreenW;
-        downscaleFactor = Renderer.ScreenW/(float)size.x;
+        upscaleFactor = size.x/(float)Renderer.SCREEN_W;
+        downscaleFactor = Renderer.SCREEN_W/(float)size.x;
 
         canvas.Paint += OnPaint!;
         canvas.MouseClick += Input.OnMouseClick!;
@@ -104,6 +97,8 @@ public class Window
             Enabled = true,
             Interval = 1000d / (_targetTps = targetTps)
         }).Start();
+
+        _targetInterval = 1000f / targetTps;
 
         tick += (_, _) => {
             ticksPassed++;
@@ -139,11 +134,7 @@ public class Window
         args.Graphics.PixelOffsetMode = PixelOffsetMode.None;
         args.Graphics.CompositingQuality = CompositingQuality.HighQuality;
 
-        try
-        {
-            args.Graphics.DrawImage(Renderer.screen, 0, yRenderOffset, renderSize.x, renderSize.y);
-        } 
-        catch { }
+        args.Graphics.DrawImage(Renderer.screen, 0, yRenderOffset, renderSize.x, renderSize.y);
     }
 
 

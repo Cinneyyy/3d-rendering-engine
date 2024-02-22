@@ -35,6 +35,7 @@ public record struct Vec2f(float x, float y) : IEnumerable<float>
 
 
     public readonly override string ToString() => $"({x}; {y})";
+    public readonly string ToString(string? fFormat) => $"({x.ToString(fFormat)}; {y.ToString(fFormat)})";
 
     public readonly void Deconstruct(out float x, out float y)
     {

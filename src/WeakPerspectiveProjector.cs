@@ -1,5 +1,4 @@
-﻿using System.Windows.Forms;
-using System;
+﻿using System;
 
 namespace src;
 
@@ -11,6 +10,9 @@ public static class WeakPerspectiveProjector
         Vec3f translated = rotated - new Vec3f(0f, 0f, fov);
         return Project(translated, fov);
     }
+
+    public static Vec2f Project3dPoint(Vec3f pt, WorldObject obj, Camera cam)
+        => Project(RotateYXZ(RotateYXZ(pt - obj.anchor, obj.rot) - cam.pos + obj.pos, cam.rot) - cam.focalPlane, cam.fov);
 
     public static Vec3f RotateX(Vec3f pt, float rot)
         => new(pt.x,
