@@ -26,12 +26,12 @@ public static class ProcessState
         if(Input.KeyDown(Keys.F2))
             Input.lockCursor ^= true;
 
-        if(Input.KeyHelt(Keys.Left)) cam.rot.y -= dt;
-        if(Input.KeyHelt(Keys.Right)) cam.rot.y +=dt;
-        if(Input.KeyHelt(Keys.Up)) cam.rot.x += dt;
-        if(Input.KeyHelt(Keys.Down)) cam.rot.x -= dt;
+        if(Input.KeyHelt(Keys.Left)) cam.RotateY(-dt);
+        if(Input.KeyHelt(Keys.Right)) cam.RotateY(dt);
+        if(Input.KeyHelt(Keys.Up)) cam.RotateX(-dt);
+        if(Input.KeyHelt(Keys.Down)) cam.RotateX(dt);
         cam.rot %= MathF.Tau;
-        cam.rot.x = UtilFuncs.Clamp(cam.rot.x, -MathF.PI/2f, MathF.PI/2f);
+        cam.SetRot(x: UtilFuncs.Clamp(cam.rot.x, -MathF.PI/2f, MathF.PI/2f));
 
         Vec3f move = new();
         if(Input.KeyHelt(Keys.W)) move.z += dt;

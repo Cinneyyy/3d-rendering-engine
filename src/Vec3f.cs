@@ -62,6 +62,11 @@ public record struct Vec3f(float x, float y, float z) : IEnumerable<float>
     public static float Dot(Vec3f a, Vec3f b)
         => a.x*b.x + a.y*b.y + a.z*b.z;
 
+    public static Vec3f Cross(Vec3f a, Vec3f b)
+        => new(a.y*b.z - a.z*b.y,
+               a.z*b.x - a.x*b.z,
+               a.x*b.y - a.y*b.x);
+
     public static Vec3f RotateX(Vec3f v, float rot)
         => new(v.x,
                MathF.Cos(rot) * v.y - MathF.Sin(rot) * v.z,

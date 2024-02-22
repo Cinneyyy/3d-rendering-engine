@@ -15,6 +15,8 @@ public static class Renderer
     public const int CENTER_X = SCREEN_W/2;
     public const int CENTER_Y = SCREEN_H/2;
     public const int LAYER_COUNT = 8;
+    public const float RATIO_HW = (float)SCREEN_H / SCREEN_W ;
+    public const float RATIO_WH = (float)SCREEN_W / SCREEN_H ;
 
     private const float FRAME_HALT_LENIENCY = 2.5f;
 
@@ -22,7 +24,7 @@ public static class Renderer
     public static readonly Vec2f screenCenter = new(CENTER_X, CENTER_Y);
     public static readonly Bitmap screen = new(SCREEN_W, SCREEN_H);
     public static readonly List<IRenderableObject>[] renderObjects = new List<IRenderableObject>[LAYER_COUNT];
-    public static Camera cam = new(new(0f, 0f, -3f), Vec3f.zero, 90f);
+    public static Camera cam = new(new(0f, 0f, -3f), Vec3f.zero, 90f, .1f, 100f);
 
     private static readonly Graphics canvas = Graphics.FromImage(screen);
     private static bool drawing = false;
@@ -30,6 +32,10 @@ public static class Renderer
 
     public static ulong frameCount { get; private set; } = 0;
     public static ulong frameSkips { get; private set; } = 0;
+
+
+    static Renderer()
+        => cam.CalculateProjectionMatrix();
 
 
     public static void Tick(object? sender, ElapsedEventArgs args)
@@ -67,10 +73,10 @@ public static class Renderer
 
     public static Vec2f WorldToScreen(Vec2f pt, out bool oob)
     {
-        oob = false;
+        oob = MathF.Abs(pt.x) > 1f || MathF.Abs(pt.y) > 1f;
+
         pt = (pt + Vec2f.one) / 2f;
-        pt *= SCREEN_H;
-        pt += new Vec2f(CENTER_Y, 0f);
+        pt *= screenSize;
         pt.y = SCREEN_H - pt.y;
         return pt;
     }

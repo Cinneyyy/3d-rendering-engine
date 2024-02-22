@@ -6,6 +6,7 @@ public class MeshRenderer(Mesh? mesh = null) : WorldObject, IRenderableObject
 {
     private Mesh? _mesh = mesh;
     private Point[] projBuff = new Point[mesh?.verts?.Length ?? 0];
+    private bool[] oobBuff = new bool[mesh?.verts?.Length ?? 0];
 
 
     public Mesh? mesh
@@ -13,14 +14,22 @@ public class MeshRenderer(Mesh? mesh = null) : WorldObject, IRenderableObject
         get => _mesh;
         set {
             if(_mesh != null)
-                _mesh.onVertCountChanged -= c => projBuff = new Point[c];
+                _mesh.onVertCountChanged -= c => {
+                    projBuff = new Point[c];
+                    oobBuff = new bool[c];
+                };
 
             _mesh = value;
 
             if(_mesh != null)
             {
-                _mesh.onVertCountChanged += c => projBuff = new Point[c];
+                _mesh.onVertCountChanged += c => {
+                    projBuff = new Point[c];
+                    oobBuff = new bool[c];
+                };
+
                 projBuff = new Point[_mesh.verts.Length];
+                oobBuff = new bool[_mesh.verts.Length];
             }
         }
     }
@@ -47,16 +56,16 @@ public class MeshRenderer(Mesh? mesh = null) : WorldObject, IRenderableObject
         for(int i = 0; i < projBuff.Length; i++)
         {
             Vec2f uv;
-            projBuff[i] = (Point)Renderer.WorldToScreen(uv = WPP.Project3dPoint(mesh.verts[i], this, Renderer.cam), out var _);
+            projBuff[i] = (Point)Renderer.WorldToScreen(uv = WPP.Project3dPoint(mesh.verts[i], this, Renderer.cam), out oobBuff[i]);
             canvas.DrawString(uv.ToString("0.00"), font, Brushes.White, projBuff[i].X, projBuff[i].Y);
         }
 
         Pen pen = new(Brushes.White);
         foreach(var t in mesh.tris)
         {
-            canvas.DrawLine(pen, projBuff[t.a], projBuff[t.b]);
-            canvas.DrawLine(pen, projBuff[t.b], projBuff[t.c]);
-            canvas.DrawLine(pen, projBuff[t.c], projBuff[t.a]);
+            if(!(oobBuff[t.a] && oobBuff[t.b])) canvas.DrawLine(pen, projBuff[t.a], projBuff[t.b]);
+            if(!(oobBuff[t.b] && oobBuff[t.c])) canvas.DrawLine(pen, projBuff[t.b], projBuff[t.c]);
+            if(!(oobBuff[t.c] && oobBuff[t.a])) canvas.DrawLine(pen, projBuff[t.c], projBuff[t.a]);
         }
     }
 }
