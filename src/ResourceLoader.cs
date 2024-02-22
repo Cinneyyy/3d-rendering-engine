@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
@@ -12,7 +11,8 @@ public static class ResourceLoader
     {
         Bitmap,
         EdgeMesh,
-        EdgeMeshAllCons
+        EdgeMeshAllCons,
+        QuadMesh
     }
 
     public static class Path
@@ -25,11 +25,18 @@ public static class ResourceLoader
 
     public static readonly Dictionary<string, Bitmap> bitmaps = [];
     public static readonly Dictionary<string, EdgeMesh> edgeMeshes = [];
+    public static readonly Dictionary<string, QuadMesh> quadMeshes = [];
 
     private static readonly (ResType type, string id, string manifest)[] manifestData = [
         (ResType.Bitmap, "missing", Path.App + "Missing.png"),
         (ResType.Bitmap, "amon", Path.App + "vosuzrp9efj81.jpg"),
         (ResType.Bitmap, "bk", Path.App + "bk.PNG"),
+
+        //(ResType.QuadMesh, "monke", Path.Models + "monke.obj"),
+        (ResType.QuadMesh, "cube", Path.Models + "cube.obj"),
+        //(ResType.QuadMesh, "torus", Path.Models + "torus.obj"),
+        //(ResType.QuadMesh, "th_txt", Path.Models + "text_thin.obj"),
+        //(ResType.QuadMesh, "md_txt", Path.Models + "text_medium.obj"),
 
         (ResType.EdgeMesh, "monke", Path.Models + "monke.obj"),
         (ResType.EdgeMesh, "cube", Path.Models + "cube.obj"),
@@ -56,6 +63,7 @@ public static class ResourceLoader
                         case ResType.Bitmap: bitmaps.Add(id, new(stream!)); break;
                         case ResType.EdgeMesh: edgeMeshes.Add(id, ObjLoader.LoadToEdgeMesh(stream!, true)); break;
                         case ResType.EdgeMeshAllCons: edgeMeshes.Add(id, ObjLoader.LoadToEdgeMesh(stream!, false)); break;
+                        case ResType.QuadMesh: quadMeshes.Add(id, ObjLoader.LoadToQuadMesh(stream!)); break;
                     }
                 }
 

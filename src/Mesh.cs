@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using WPP = src.WeakPerspectiveProjector;
@@ -8,6 +7,8 @@ namespace src;
 
 public abstract class Mesh(params Vec3f[] vertices) : WorldObject(), IRenderableObject
 {
+    private protected static readonly PointF culled = new(float.PositiveInfinity, float.PositiveInfinity);
+
     private protected PointF[] projectionBuffer = [];
 
     private Vec3f[] vertices = vertices;
@@ -48,8 +49,9 @@ public abstract class Mesh(params Vec3f[] vertices) : WorldObject(), IRenderable
 
         projectionBuffer =
             (from v in GetVertices()
-             let proj = (PointF)Renderer.WorldToScreen(WPP.Project3dPoint(v, rot, anchor, pos, Renderer.cam.pos, Renderer.cam.rot, Renderer.cam.fov))
-             select proj with { Y = Renderer.ScreenH - proj.Y })
+             let cull = WPP.Cull(v, Renderer.cam.pos, Renderer.cam.rot, Renderer.cam.fov)
+             let proj = cull ? culled : (PointF)Renderer.WorldToScreen(WPP.Project3dPoint(v, rot, anchor, pos, Renderer.cam.pos, Renderer.cam.rot, Renderer.cam.fov))
+             select cull ? proj : (proj with { Y = Renderer.ScreenH - proj.Y }))
             .ToArray();
 
         DrawToScreen(canvas);

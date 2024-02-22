@@ -16,7 +16,8 @@ public class EdgeMesh(Vec3f[] vertices, EdgeMesh.Edge[] edges) : Mesh(vertices)
     private protected override void DrawToScreen(Graphics canvas)
     {
         foreach(Edge e in edges)
-            canvas.DrawLine(new(Brushes.White), projectionBuffer[e.a], projectionBuffer[e.b]);
+            if(projectionBuffer[e.a] != culled && projectionBuffer[e.b] != culled)
+                canvas.DrawLine(new(Brushes.White), projectionBuffer[e.a], projectionBuffer[e.b]);
     }
 
     private protected override Mesh CopyMeshChild()

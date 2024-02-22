@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Linq;
 
 namespace src;
@@ -46,7 +45,6 @@ public class QuadMesh(Vec3f[] vertices, QuadMesh.Quad[] quads) : Mesh(vertices)
     private protected override void DrawToScreen(Graphics canvas)
     {
         PointF[] points = new PointF[4];
-        Array.Sort(quads, (a, b) => (int)((Quad.Dist(b, this) - Quad.Dist(a, this))) * 100);
 
         foreach(Quad q in quads)
         {
