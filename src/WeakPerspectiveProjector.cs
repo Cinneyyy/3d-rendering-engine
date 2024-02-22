@@ -2,11 +2,12 @@
 
 public static class WeakPerspectiveProjector
 {
-    public static Vec2f Project3dPoint(Vec3f pt, WorldObject obj, Camera cam)
-    {
-        Vec3f rotated = obj.rotMatrix.MultiplyWithVec3f(pt - obj.anchor) - cam.pos + obj.pos;
-        Vec3f rotatedCam = cam.rotMatrix.MultiplyWithVec3f(rotated);
-        Vec3f projected = cam.projectionMatrix.MultiplyWithVec3f(rotatedCam);
-        return (Vec2f)projected;
-    }
+    public static Vec3f RotatePtAroundSelf(Vec3f pt, WorldObject obj, Camera cam)
+        => obj.rotMatrix.MultiplyWithVec3f(pt - obj.anchor) - cam.pos;
+
+    public static Vec3f RotatePtForCam(Vec3f pt, Camera cam)
+        => cam.rotMatrix.MultiplyWithVec3f(pt);
+
+    public static Vec3f Project(Vec3f pt, Camera cam)
+        => cam.projectionMatrix.MultiplyWithVec3f(pt);
 }

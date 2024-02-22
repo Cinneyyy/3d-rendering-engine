@@ -14,7 +14,7 @@ public static partial class ConsoleWindow
     }
 
 
-    public static readonly IntPtr consoleWindow = IntPtr.Zero;//GetConsoleWindow();
+    public static readonly IntPtr consoleWindow = GetConsoleWindow();
 
     private static WindowMode _windowMode = WindowMode.Restore;
 
@@ -29,7 +29,7 @@ public static partial class ConsoleWindow
     public static bool ShowWindow(WindowMode windowMode) 
     {
         _windowMode = windowMode;
-        return true;//ShowWindow(consoleWindow, (int)windowMode); 
+        return ShowWindow(consoleWindow, (int)windowMode); 
     }
     public static bool ShowWindow(int cmdShow) 
         => ShowWindow((WindowMode)cmdShow);
@@ -45,16 +45,16 @@ public static partial class ConsoleWindow
         Console.WriteLine(o);
     }
 
-    //public static IntPtr PostMessage(ConsoleKey key, uint msg = 0x100u) => PostMessage(consoleWindow, msg, (IntPtr)key, IntPtr.Zero);
+    public static IntPtr PostMessage(ConsoleKey key, uint msg = 0x100u) => PostMessage(consoleWindow, msg, (IntPtr)key, IntPtr.Zero);
 
 
-    //[LibraryImport("kernel32.dll")]
-    //private static partial IntPtr GetConsoleWindow();
+    [LibraryImport("kernel32.dll")]
+    private static partial IntPtr GetConsoleWindow();
 
-    //[LibraryImport("user32.dll")]
-    //[return: MarshalAs(UnmanagedType.Bool)]
-    //private static partial bool ShowWindow(IntPtr hWnd, int cmdShow);
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool ShowWindow(IntPtr hWnd, int cmdShow);
 
-    //[LibraryImport("user32.dll")]
-    //private static partial IntPtr PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+    [LibraryImport("user32.dll")]
+    private static partial IntPtr PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 }

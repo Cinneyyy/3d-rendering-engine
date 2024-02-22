@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System;
+using System.Drawing;
 
 namespace src;
 
@@ -43,16 +44,21 @@ public static class ObjLoader
         }
 
         List<Tri> tris = [];
+        Random rand = new();
+        Brush newBrush() 
+            => new SolidBrush(Color.FromArgb((0x80 << 24) | ((int)(0xff * rand.NextSingle()) << 16) | ((int)(0xff * rand.NextSingle()) << 8) | (int)(0xff * rand.NextSingle())));
         foreach(int[] f in faces)
         {
+            Brush brush = newBrush();
+
             switch(f.Length)
             {
                 case 3:
-                    tris.Add(new(f[0], f[1], f[2])); 
+                    tris.Add(new(f[0], f[1], f[2], brush)); 
                     break;
                 case 4:
-                    tris.Add(new(f[0], f[1], f[3]));
-                    tris.Add(new(f[1], f[2], f[3]));
+                    tris.Add(new(f[0], f[1], f[3], brush));
+                    tris.Add(new(f[1], f[2], f[3], brush));
                     break;
                 default: throw new($"Invalid number of vertices ({f.Length}) on face: [{f.FormatStr(", ")}]");
             }

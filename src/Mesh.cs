@@ -7,6 +7,7 @@ namespace src;
 public class Mesh(Vec3f[]? verts = null, Tri[]? tris = null)
 {
     private Vec3f[] _verts = verts ?? [];
+    private Tri[] _tris = tris ?? [];
 
 
     public Vec3f[] verts
@@ -20,10 +21,22 @@ public class Mesh(Vec3f[]? verts = null, Tri[]? tris = null)
                 onVertCountChanged?.Invoke(_verts.Length);
         }
     }
-    public Tri[] tris { get; set; } = tris ?? [];
+    public Tri[] tris
+    {
+        get => _tris;
+        set {
+            int oldLen = _tris.Length;
+            _tris = value;
+            onTrisChanged?.Invoke(_tris);
+            if(oldLen != _tris.Length)
+                onTriCountChanged?.Invoke(_tris.Length);
+        }
+    }
     public Vec3f anchor { get; set; } = Vec3f.zero;
     public event Action<Vec3f[]>? onVertsChanged;
     public event Action<int>? onVertCountChanged;
+    public event Action<Tri[]>? onTrisChanged;
+    public event Action<int>? onTriCountChanged;
 
 
     public Mesh(IEnumerable<Vec3f>? vertices = null, IEnumerable<Tri>? tris = null) : this(vertices?.ToArray(), tris?.ToArray()) { }

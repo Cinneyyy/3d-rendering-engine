@@ -29,7 +29,7 @@ public static class ResourceLoader
         (ResType.Bitmap, "amon", Path.APP + "vosuzrp9efj81.jpg"),
         (ResType.Bitmap, "bk", Path.APP + "bk.PNG"),
 
-        //(ResType.QuadMesh, "monke", Path.Models + "monke.obj"),
+        (ResType.Mesh, "monke", Path.MODELS + "monke.obj"),
         (ResType.Mesh, "cube", Path.MODELS + "cube.obj"),
         //(ResType.QuadMesh, "torus", Path.Models + "torus.obj"),
         //(ResType.QuadMesh, "th_txt", Path.Models + "text_thin.obj"),

@@ -54,7 +54,7 @@ public static class Renderer
                 {
                     Draw();
                 }
-                catch(System.Exception e)
+                catch(Exception e)
                 {
                     drawing = false;
                     Out($"Error at frame #{frameCount}: {e}");
@@ -71,10 +71,8 @@ public static class Renderer
     public static Vec2f OffsetToCenter(Vec2f pos) => screenCenter + pos;
     public static Vec2i OffsetToCenter(Vec2i pos) => screenCenter.Round() + pos;
 
-    public static Vec2f WorldToScreen(Vec2f pt, out bool oob)
+    public static Vec2f UvToScreen(Vec2f pt)
     {
-        oob = MathF.Abs(pt.x) > 1f || MathF.Abs(pt.y) > 1f;
-
         pt = (pt + Vec2f.one) / 2f;
         pt *= screenSize;
         pt.y = SCREEN_H - pt.y;

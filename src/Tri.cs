@@ -1,3 +1,5 @@
-﻿namespace src;
+﻿using System.Drawing;
 
-public record struct Tri(int a, int b, int c);
+namespace src;
+
+public record struct Tri(int a, int b, int c, Brush brush);
